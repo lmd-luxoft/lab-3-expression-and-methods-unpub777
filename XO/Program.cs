@@ -28,10 +28,7 @@ namespace XO
         }
         static void make_move(int num)
         {
-            if (num == 1) 
-                Console.Write(PlayerName1);
-            else 
-                Console.Write(PlayerName2);
+            Console.Write(GetPlayerName(num));
 
             var cell = getCell(",введите номер ячейки,сделайте свой ход:");
 
@@ -42,11 +39,12 @@ namespace XO
                 Console.WriteLine();
             }
 
-            if (num == 1) 
-                cells[cell - 1] = 'X';
-            else 
-                cells[cell - 1] = 'O';
+            cells[cell - 1] = GetPlayerMark(num);
         }
+
+        static string GetPlayerName(int num) => num == 1 ? PlayerName1 : PlayerName2;
+
+        static char GetPlayerMark(int num)  => num == 1 ? 'X' : 'O';
 
         static int getCell(string message)
         {
@@ -72,19 +70,17 @@ namespace XO
         {
             for (int i = 0; i < 3; i++)
             {
-                if (CheckCondition1(i))
-                    return cells[i];
-                if (CheckCondition2(i))
-                    return cells[i];
-                if (CheckCondition3(i))
+                if (HasVictory(i))
                     return cells[i];
             }
             return '-';
         }
 
-        static bool CheckCondition1(int index) => cells[index * 3] == cells[index * 3 + 1] && cells[index * 3 + 1] == cells[index * 3 + 2];
-        static bool CheckCondition2(int index) => cells[index * 3] == cells[index * 3 + 1] && cells[index * 3 + 1] == cells[index * 3 + 2];
-        static bool CheckCondition3(int index) => cells[index * 3] == cells[index * 3 + 1] && cells[index * 3 + 1] == cells[index * 3 + 2];
+        static bool HasVictory(int index) => HasHorizontalLine(index) || HasVerticalLine(index) || HasDiagLine();
+
+        static bool HasHorizontalLine(int index) => cells[index * 3] == cells[index * 3 + 1] && cells[index * 3 + 1] == cells[index * 3 + 2];
+        static bool HasVerticalLine(int index) => cells[index] == cells[index + 3] && cells[index + 3] == cells[index + 6];
+        static bool HasDiagLine() => (cells[2] == cells[4] && cells[4] == cells[6]) || (cells[0] == cells[4] && cells[4] == cells[8]);
 
         static void result()
         {
