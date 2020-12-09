@@ -28,53 +28,72 @@ namespace XO
         }
         static void make_move(int num)
         {
-            string raw_cell;
-            int cell;
-            if (num == 1) Console.Write(PlayerName1);
-            else Console.Write(PlayerName2);
-            do
-            {
-                Console.Write(",введите номер ячейки,сделайте свой ход:");
+            Console.Write(GetPlayerName(num));
 
-                raw_cell = Console.ReadLine();
-            }
-            while (!Int32.TryParse(raw_cell, out cell));
-            while (cell > 9 || cell < 1 || cells[cell - 1] == 'O' || cells[cell - 1] == 'X')
+            var cell = getCell(",введите номер ячейки,сделайте свой ход:");
+
+            while (IsIncorrectPlace(cell))
             {
-                do
-                {
-                    Console.Write("Введите номер правильного ( 1-9 ) или пустой ( --- ) клетки , чтобы сделать ход:");
-                    raw_cell = Console.ReadLine();
-                }
-                while (!Int32.TryParse(raw_cell, out cell));
+                cell = getCell("Введите номер правильного ( 1-9 ) или пустой ( --- ) клетки , чтобы сделать ход:");
+
                 Console.WriteLine();
             }
-            if (num == 1) cells[cell - 1] = 'X';
-            else cells[cell - 1] = 'O';
-            
+
+            cells[cell - 1] = GetPlayerMark(num);
         }
+
+        static string GetPlayerName(int num) => num == 1 ? PlayerName1 : PlayerName2;
+
+        static char GetPlayerMark(int num)  => num == 1 ? 'X' : 'O';
+
+        static int getCell(string message)
+        {
+            do
+            {
+                Console.Write(message);
+
+                var raw_cell = Console.ReadLine();
+                if (Int32.TryParse(raw_cell, out var cell))
+                {
+                    return cell;
+                }
+            }
+            while (true);
+        }
+
+        static bool IsIncorrectPlace(int cell)
+        {
+            return (cell > 9 || cell < 1 || cells[cell - 1] == 'O' || cells[cell - 1] == 'X');
+        }
+
         static char check()
         {
             for (int i = 0; i < 3; i++)
-                if (cells[i * 3] == cells[i * 3 + 1] && cells[i * 3 + 1] == cells[i * 3 + 2])
+            {
+                if (HasVictory(i))
                     return cells[i];
-                else if (cells[i] == cells[i + 3] && cells[i + 3] == cells[i + 6])
-                    return cells[i];
-                else if ((cells[2] == cells[4] && cells[4] == cells[6]) || (cells[0] == cells[4] && cells[4] == cells[8]))
-                    return cells[i];
+            }
             return '-';
         }
+
+        static bool HasVictory(int index) => HasHorizontalLine(index) || HasVerticalLine(index) || HasDiagLine();
+
+        static bool HasHorizontalLine(int index) => cells[index * 3] == cells[index * 3 + 1] && cells[index * 3 + 1] == cells[index * 3 + 2];
+        static bool HasVerticalLine(int index) => cells[index] == cells[index + 3] && cells[index + 3] == cells[index + 6];
+        static bool HasDiagLine() => (cells[2] == cells[4] && cells[4] == cells[6]) || (cells[0] == cells[4] && cells[4] == cells[8]);
 
         static void result()
         {
             if (win == 'X')
+            {
                 Console.WriteLine($"{PlayerName1} вы  выиграли поздравляем {PlayerName2} а вы проиграли...");
-            else if (win == 'O')
-                Console.WriteLine($"{PlayerName2} вы  выиграли поздравляем {PlayerName1} а вы проиграли...");
+                return;
+            }
 
+            Console.WriteLine($"{PlayerName2} вы  выиграли поздравляем {PlayerName1} а вы проиграли...");
         }
 
-        static void Main(string[] args)
+        static void inputPlayers()
         {
             do
             {
@@ -85,13 +104,19 @@ namespace XO
                 PlayerName2 = Console.ReadLine();
                 Console.WriteLine();
             } while (PlayerName1 == PlayerName2);
+        }
+
+        static int getActivePlayer(int move) => move % 2 != 0 ? 1 : 2;
+
+        static void Main(string[] args)
+        {
+            inputPlayers();
 
             show_cells();
 
             for (int move = 1; move <= 9; move++)
             {
-                if (move % 2 != 0) make_move(1);
-                else make_move(2);
+                make_move(getActivePlayer(move));
 
                 show_cells();
 
